@@ -85,25 +85,15 @@ def calculate_classical_shadow(circuit_template, shadow_size, num_qubits, prob=0
     return outcomes, unitary_ids
 
 
-def shadow_state_reconstruction(shadow):
-
-    num_snapshots, num_qubits = shadow[0].shape
+def shadow_state_reconstruction(shadow, num_qubits):
+    num_snapshots, _ = shadow[0].shape
     b_lists, obs_lists = shadow
-
     shadow_rho = np.zeros((2**num_qubits, 2**num_qubits), dtype=complex)
+
     for i in range(num_snapshots):
-        shadow_rho += snapshot_state(b_lists[i], obs_lists[i])#each snapshot state has dim (512,512)
-    return shadow_rho / np.trace(shadow_rho) #num_snapshots
+        shadow_rho += snapshot_state(b_lists[i], obs_lists[i])  # assuming snapshot_state is defined elsewhere
 
-
-def create_classical_shadow(circuit, shadow_size, num_qubits):
-    shadow = calculate_classical_shadow( 
-        circuit_template = circuit, shadow_size = shadow_size, num_qubits = num_qubits
-        )
-
-    density_matrix = shadow_state_reconstruction(shadow)
-
-    return density_matrix
+    return shadow_rho / np.trace(shadow_rho)
 
 
 def fidelity(rho, sigma):

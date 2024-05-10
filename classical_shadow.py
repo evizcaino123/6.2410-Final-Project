@@ -70,19 +70,19 @@ def snapshot_state(b_list = None, obs_list = None, im_time_evo_op = None):
 
 
 
-def calculate_classical_shadow(circuit_template = None, shadow_size = None, num_qubits = None):
-
+def calculate_classical_shadow(circuit_template, shadow_size, num_qubits, prob=0.8):
     unitary_ensemble = [qml.PauliX, qml.PauliY, qml.PauliZ]
-    unitary_ids = np.random.randint(0, 3, size=(shadow_size, num_qubits)) #generate random measurement bases
-
+    unitary_ids = np.random.randint(0, 3, size=(shadow_size, num_qubits))
     outcomes = np.zeros((shadow_size, num_qubits))
 
-    for num_shadows in range(shadow_size): #pick random observalbes and calculate expectation values
-        obs = [unitary_ensemble[int(unitary_ids[num_shadows,i])](i) for i in range(num_qubits)]
-        #obs = [unitary_ensemble[unitary_id](i) for i, unitary_id in enumerate(unitary_ids[num_shadows])]
-        outcomes[num_shadows, :] = circuit_template(num_qubits, obs)
-    
-    return (outcomes, unitary_ids)
+    for num_shadows in range(shadow_size):
+        obs = [unitary_ensemble[int(unitary_ids[num_shadows, i])](i) for i in range(num_qubits)]
+        if np.random.rand() > prob:
+            outcomes[num_shadows, :] = 1 - circuit_template(num_qubits, obs)  # Flip state with 1-prob
+        else:
+            outcomes[num_shadows, :] = circuit_template(num_qubits, obs)
+
+    return outcomes, unitary_ids
 
 
 def shadow_state_reconstruction(shadow):
